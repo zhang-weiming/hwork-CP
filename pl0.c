@@ -136,6 +136,21 @@ void getsym(void){
 			// printf("\n");
 			exit(1);
 		}
+		if (sym == SYM_LPAREN) { // '('
+			if (ch == '*') { // ×¢ÊÍ¿é¿ªÊ¼
+				while (1) {
+					do {
+						getch();
+					} while (ch != '*');
+					getch();
+					if (ch == ')') { // ×¢ÊÍ¿é½áÊø
+						getch();
+						getsym();
+						break;
+					}
+				} // while
+			} // if
+		} // if
 	}
 } // getsym
 

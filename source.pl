@@ -1,7 +1,6 @@
 const m = 7, n = 85;
 var x, y, z, q, r;
-procedure multiply; (* anno
-tation *)
+procedure multiply; (* annotation *)
 var a, b;
 begin
     a := x; b := y; z := 0;
