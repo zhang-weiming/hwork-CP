@@ -1,0 +1,518 @@
+Please input source file name: [code]    0  const m = 7, n = 85;
+[code]    1  var x, y, z, q, r;
+[code]    1  procedure multiply;
+[code]    1  var a, b;
+[code]    2  begin
+[code]    3      a := x; b := y; z := 0;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]    9      while b > 0 do
+[code]   13      begin
+[code]   13          if odd b then z := z + a;
+                                    ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   20          a := 2 * a; b := b / 2;
+                      ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   28      end
+[code]   28  end;
+
+    2 INT	0	5
+    3 LOD	1	3
+    4 STO	0	3
+    5 LOD	1	4
+    6 STO	0	4
+    7 LIT	0	0
+    8 STO	1	5
+    9 LOD	0	4
+   10 LIT	0	0
+   11 OPR	0	11
+   12 JPC	0	29
+   13 LOD	0	4
+   14 OPR	0	6
+   15 JPC	0	20
+   16 LOD	1	5
+   17 LOD	0	3
+   18 OPR	0	2
+   19 STO	1	5
+   20 LIT	0	2
+   21 LOD	0	3
+   22 OPR	0	4
+   23 STO	0	3
+   24 LOD	0	4
+   25 LIT	0	2
+   26 OPR	0	5
+   27 STO	0	4
+   28 JMP	0	9
+   29 OPR	0	0
+
+[code]   30  
+[code]   30  procedure divide;
+[code]   30  var w;
+[code]   31  begin
+[code]   32      r := x; q := 0; w := y;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   38      while w > y do
+[code]   42      begin
+[code]   42          q := 2 * q; w := w / 2;
+                      ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   50          if w <= r then
+                         ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   53          begin
+[code]   54              r := r - w;
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   58              q := q + 1;
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   62          end;
+[code]   62      end
+[code]   62  end;
+
+   31 INT	0	4
+   32 LOD	1	3
+   33 STO	1	7
+   34 LIT	0	0
+   35 STO	1	6
+   36 LOD	1	4
+   37 STO	0	3
+   38 LOD	0	3
+   39 LOD	1	4
+   40 OPR	0	11
+   41 JPC	0	63
+   42 LIT	0	2
+   43 LOD	1	6
+   44 OPR	0	4
+   45 STO	1	6
+   46 LOD	0	3
+   47 LIT	0	2
+   48 OPR	0	5
+   49 STO	0	3
+   50 LOD	0	3
+   51 LOD	1	7
+   52 OPR	0	10
+   53 JPC	0	62
+   54 LOD	1	7
+   55 LOD	0	3
+   56 OPR	0	3
+   57 STO	1	7
+   58 LOD	1	6
+   59 LIT	0	1
+   60 OPR	0	2
+   61 STO	1	6
+   62 JMP	0	38
+   63 OPR	0	0
+
+[code]   64  
+[code]   64  procedure gcd;
+[code]   64  var f, g;
+[code]   65  begin
+[code]   66      f := x;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   68      g := y;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   70      while f <> g do
+                        ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 12
+1, 2, 14, 
+[code]   74      begin
+[code]   74          if f < g then g := g - f;
+                                    ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   82          if g < f then f := f - g;
+    请按任意键继续. . . 
+                                ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   90      end
+[code]   90  end;
+
+   65 INT	0	5
+   66 LOD	1	3
+   67 STO	0	3
+   68 LOD	1	4
+   69 STO	0	4
+   70 LOD	0	3
+   71 LOD	0	4
+   72 OPR	0	8
+   73 JPC	0	91
+   74 LOD	0	3
+   75 LOD	0	4
+   76 OPR	0	9
+   77 JPC	0	82
+   78 LOD	0	4
+   79 LOD	0	3
+   80 OPR	0	3
+   81 STO	0	4
+   82 LOD	0	4
+   83 LOD	0	3
+   84 OPR	0	9
+   85 JPC	0	90
+   86 LOD	0	3
+   87 LOD	0	4
+   88 OPR	0	3
+   89 STO	0	3
+   90 JMP	0	70
+   91 OPR	0	0
+
+[code]   92  
+[code]   92  begin
+[code]   93      x := m; y := n; call multiply;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   98      x := 25; y := 3; call divide;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                           ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]  103      x := 34; y := 36; call gcd;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                           ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]  108  end.
+
+   92 INT	0	8
+   93 LIT	0	7
+   94 STO	0	3
+   95 LIT	0	85
+   96 STO	0	4
+   97 CAL	0	2
+   98 LIT	0	25
+   99 STO	0	3
+  100 LIT	0	3
+  101 STO	0	4
+  102 CAL	0	31
+  103 LIT	0	34
+  104 STO	0	3
+  105 LIT	0	36
+  106 STO	0	4
+  107 CAL	0	65
+  108 OPR	0	0
+
+Please input source file name: [code]    0  const m = 7, n = 85;
+[code]    1  var x, y, z, q, r;
+[code]    1  procedure multiply;
+[code]    1  var a, b;
+[code]    2  begin
+[code]    3      a := x; b := y; z := 0;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]    9      while b > 0 do
+[code]   13      begin
+[code]   13          if odd b then z := z + a;
+                                    ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   20          a := 2 * a; b := b / 2;
+                      ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   28      end
+[code]   28  end;
+
+    2 INT	0	5
+    3 LOD	1	3
+    4 STO	0	3
+    5 LOD	1	4
+    6 STO	0	4
+    7 LIT	0	0
+    8 STO	1	5
+    9 LOD	0	4
+   10 LIT	0	0
+   11 OPR	0	11
+   12 JPC	0	29
+   13 LOD	0	4
+   14 OPR	0	6
+   15 JPC	0	20
+   16 LOD	1	5
+   17 LOD	0	3
+   18 OPR	0	2
+   19 STO	1	5
+   20 LIT	0	2
+   21 LOD	0	3
+   22 OPR	0	4
+   23 STO	0	3
+   24 LOD	0	4
+   25 LIT	0	2
+   26 OPR	0	5
+   27 STO	0	4
+   28 JMP	0	9
+   29 OPR	0	0
+
+[code]   30  
+[code]   30  procedure divide;
+[code]   30  var w;
+[code]   31  begin
+[code]   32      r := x; q := 0; w := y;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   38      while w > y do
+[code]   42      begin
+[code]   42          q := 2 * q; w := w / 2;
+                      ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   50          if w <= r then
+                         ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   53          begin
+[code]   54              r := r - w;
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   58              q := q + 1;
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   62          end;
+[code]   62      end
+[code]   62  end;
+
+   31 INT	0	4
+   32 LOD	1	3
+   33 STO	1	7
+   34 LIT	0	0
+   35 STO	1	6
+   36 LOD	1	4
+   37 STO	0	3
+   38 LOD	0	3
+   39 LOD	1	4
+   40 OPR	0	11
+   41 JPC	0	63
+   42 LIT	0	2
+   43 LOD	1	6
+   44 OPR	0	4
+   45 STO	1	6
+   46 LOD	0	3
+   47 LIT	0	2
+   48 OPR	0	5
+   49 STO	0	3
+   50 LOD	0	3
+   51 LOD	1	7
+   52 OPR	0	10
+   53 JPC	0	62
+   54 LOD	1	7
+   55 LOD	0	3
+   56 OPR	0	3
+   57 STO	1	7
+   58 LOD	1	6
+   59 LIT	0	1
+   60 OPR	0	2
+   61 STO	1	6
+   62 JMP	0	38
+   63 OPR	0	0
+
+[code]   64  
+[code]   64  procedure gcd;
+[code]   64  var f, g;
+[code]   65  begin
+[code]   66      f := x;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   68      g := y;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   70      while f <> g do
+                        ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 12
+1, 2, 14, 
+[code]   74      begin
+[code]   74          if f < g then g := g - f;
+                                    ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   82          if g < f then f := f - g;
+    请按任意键继续. . . 
+                                ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   90      end
+[code]   90  end;
+
+   65 INT	0	5
+   66 LOD	1	3
+   67 STO	0	3
+   68 LOD	1	4
+   69 STO	0	4
+   70 LOD	0	3
+   71 LOD	0	4
+   72 OPR	0	8
+   73 JPC	0	91
+   74 LOD	0	3
+   75 LOD	0	4
+   76 OPR	0	9
+   77 JPC	0	82
+   78 LOD	0	4
+   79 LOD	0	3
+   80 OPR	0	3
+   81 STO	0	4
+   82 LOD	0	4
+   83 LOD	0	3
+   84 OPR	0	9
+   85 JPC	0	90
+   86 LOD	0	3
+   87 LOD	0	4
+   88 OPR	0	3
+   89 STO	0	3
+   90 JMP	0	70
+   91 OPR	0	0
+
+[code]   92  
+[code]   92  begin
+[code]   93      x := m; y := n; call multiply;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                          ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]   98      x := 25; y := 3; call divide;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                           ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]  103      x := 34; y := 36; call gcd;
+                  ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+                           ^
+[Error]  24: The symbol can not be as the beginning of an expression.
+sym = 8
+1, 2, 14, 
+[code]  108  end.
+
+   92 INT	0	8
+   93 LIT	0	7
+   94 STO	0	3
+   95 LIT	0	85
+   96 STO	0	4
+   97 CAL	0	2
+   98 LIT	0	25
+   99 STO	0	3
+  100 LIT	0	3
+  101 STO	0	4
+  102 CAL	0	31
+  103 LIT	0	34
+  104 STO	0	3
+  105 LIT	0	36
+  106 STO	0	4
+  107 CAL	0	65
+  108 OPR	0	0
+
