@@ -17,37 +17,40 @@
 enum symtype {
 	/* 0 */		SYM_NULL,	
 	/* 1 */		SYM_BLOCK,	
-	/* 2 */		SYM_A,	
-	/* 3 */		SYM_B,	
-	/* 4 */		SYM_IDENTIFIER,	
-	/* 5 */		SYM_NUMBER,	
-	/* 6 */		SYM_PLUS,	
-	/* 7 */		SYM_MINUS,	
-	/* 8 */		SYM_TIMES,	
-	/* 9 */		SYM_SLASH,	
-	/* 10 */	SYM_ODD,	
-	/* 11 */	SYM_EQU,	
-	/* 12 */	SYM_NEQ,	
-	/* 13 */	SYM_LES,	
-	/* 14 */	SYM_LEQ,	
-	/* 15 */	SYM_GTR,	
-	/* 16 */	SYM_GEQ,	
-	/* 17 */	SYM_LPAREN,	
-	/* 18 */	SYM_RPAREN,	
-	/* 19 */	SYM_COMMA,	
-	/* 20 */	SYM_SEMICOLON,	
-	/* 21 */	SYM_PERIOD,	
-	/* 22 */	SYM_BECOMES,    
-	/* 23 */	SYM_BEGIN,	
-	/* 24 */	SYM_END,	
-	/* 25 */	SYM_IF,	
-	/* 26 */	SYM_THEN,	
-	/* 27 */	SYM_WHILE,	
-	/* 28 */	SYM_DO,	
-	/* 29 */	SYM_CALL,	
-	/* 30 */	SYM_CONST,	
-	/* 31 */	SYM_VAR,	
-	/* 32 */	SYM_PROCEDURE
+	/* 2 */		SYM_A,		
+	/* 3 */		SYM_A1,	
+	/* 4 */		SYM_B,	
+	/* 5 */		SYM_B1,	
+	/* 6 */		SYM_C,	
+	/* 7 */		SYM_IDENTIFIER,	
+	/* 8 */		SYM_NUMBER,	
+	/* 9 */		SYM_PLUS,	
+	/* 10 */	SYM_MINUS,	
+	/* 11 */	SYM_TIMES,	
+	/* 12 */	SYM_SLASH,	
+	/* 13 */	SYM_ODD,	
+	/* 14 */	SYM_EQU,	
+	/* 15 */	SYM_NEQ,	
+	/* 16 */	SYM_LES,	
+	/* 17 */	SYM_LEQ,	
+	/* 18 */	SYM_GTR,	
+	/* 19 */	SYM_GEQ,	
+	/* 20 */	SYM_LPAREN,	
+	/* 21 */	SYM_RPAREN,	
+	/* 22 */	SYM_COMMA,	
+	/* 23 */	SYM_SEMICOLON,	
+	/* 24 */	SYM_PERIOD,	
+	/* 25 */	SYM_BECOMES,    
+	/* 26 */	SYM_BEGIN,	
+	/* 27 */	SYM_END,	
+	/* 28 */	SYM_IF,	
+	/* 29 */	SYM_THEN,	
+	/* 30 */	SYM_WHILE,	
+	/* 31 */	SYM_DO,	
+	/* 32 */	SYM_CALL,	
+	/* 33 */	SYM_CONST,	
+	/* 34 */	SYM_VAR,	
+	/* 35 */	SYM_PROCEDURE
 };
 enum idtype {
 	ID_CONSTANT, ID_VARIABLE, ID_PROCEDURE
@@ -144,8 +147,8 @@ char csym[NSYM + 1] = {
 };
 
 // 产生式右部
-int block_const_right[6] = {
-	SYM_CONST, SYM_IDENTIFIER, SYM_EQU, SYM_NUMBER, SYM_A, SYM_SEMICOLON
+int block_const_right[3] = {
+	SYM_A, SYM_B, SYM_C
 };
 int block_var_right[4] = {
 	SYM_VAR, SYM_IDENTIFIER, SYM_B, SYM_SEMICOLON
@@ -168,7 +171,8 @@ int B_e_right[1] = {
 struct Production {
 	int right[10];
 	int length;
-}ll1_table[5][40], elem;
+}ll1_table[10][40], elem;
+int block_status;
 // ll1文法表
 // struct Production ll1_table[3][5];
 

@@ -585,45 +585,75 @@ void block(symset fsys){//µİ¹éÏÂ½µ·¨ÖĞ¶Ô<³ÌĞòÌå>µÄ´¦Àí ¡¾ÊµÑéÈı¡¿Ö»ĞèÒªĞŞ¸Ä´Ëº¯Ê
 		error(32); // There are too many levels. levelÊÇµİ¹éÖ®ÍâµÄÈ«¾Ö±äÁ¿
 	}
 
-	// Óï·¨
-	while (sym_stack.p > -1) {
-		top = sym_stack.data[sym_stack.p];
-		while (top == SYM_NULL && sym_stack.p > -1) {
-			sym_stack.p--;
+	do {
+		// Óï·¨
+		while (sym_stack.p > -1) {
 			top = sym_stack.data[sym_stack.p];
-		}
-		if (inset(top, left_sym)) { // topÊÇ·ÇÖÕ½á·û
-			sym_stack.p--;
-			elem = ll1_table[top][sym];
-			for (i = elem.length - 1; i >= 0; i--) {
-			// for (i = 0; i < elem.length; i++) {
-				sym_stack.p++;
-				sym_stack.data[sym_stack.p] = elem.right[i];
-			}
-		} else {
-			if (top == sym) { // Æ¥Åä
-				printf("\nMetch\n");
+			while (top == SYM_NULL && sym_stack.p > -1) { // ÍÆµ¼³ö²úÉúÊ½ÓÒ²¿Îª¿Õ£¬ÇÒµ±Ç°Õ»²»¿Õ£¬Ôò¼ÌĞøÍÆµ¼Ò»²½
 				sym_stack.p--;
-			} else { // ³ö´í
-				set1 = createset(SYM_IDENTIFIER, SYM_NULL);
-				set = uniteset(statbegsys, set1);
-				test(set, declbegsys, 7); // Õâ¸öÓĞÊ²Ã´×÷ÓÃ£¿ÔÚÓï·¨´íÎó³öÏÖÊ±£¬Ìø¹ı´íÎó²¿·Ö£¬¼ÌĞøÊ¶±ğºóĞøÓï·¨ÕıÈ·²¿·Ö
-				destroyset(set1);
-				destroyset(set);
-
-				// printf("[Error]\n");
-				// printf("id = %s\n", id);
-				// printf("sym = %d\n", sym);
-				// printf("[sym_stack] ");
-				// for (i = sym_stack.p; i > -1; i--) {
-				// 	printf("%d ", sym_stack.data[i]);
-				// }
-				// printf("\n");
-				// printf("top = %d, sym_stack.p = %d\n", top, sym_stack.p);
-				// exit(1);
+				top = sym_stack.data[sym_stack.p];
 			}
-			getsym();
+			if (inset(top, left_sym)) { // topÊÇ·ÇÖÕ½á·û
+				sym_stack.p--;
+				elem = ll1_table[top][sym];
+				for (i = elem.length - 1; i >= 0; i--) {
+				// for (i = 0; i < elem.length; i++) {
+					sym_stack.p++;
+					sym_stack.data[sym_stack.p] = elem.right[i];
+				}
+				if (inset(ll1_table[top][sym].right[0], block_status_set)) {
+					block_status = ll1_table[top][sym].right[0];
+				}
+				// switch (ll1_table[top][sym].right[0]) {
+				// case SYM_CONST:
+				// 	block_status = SYM_CONST;
+				// }
+			} else {
+				if (top == sym) { // Æ¥Åä
+					printf("\nMetch µ±Ç° %d\n", block_status);
+					sym_stack.p--;
+				} else { // ³ö´í
+					set1 = createset(SYM_IDENTIFIER, SYM_NULL);
+					set = uniteset(statbegsys, set1);
+					test(set, declbegsys, 7); // Õâ¸öÓĞÊ²Ã´×÷ÓÃ£¿ÔÚÓï·¨´íÎó³öÏÖÊ±£¬Ìø¹ı´íÎó²¿·Ö£¬¼ÌĞøÊ¶±ğºóĞøÓï·¨ÕıÈ·²¿·Ö
+					destroyset(set1);
+					destroyset(set);
+
+					// printf("[Error]\n");
+					// printf("id = %s\n", id);
+					// printf("sym = %d\n", sym);
+					// printf("[sym_stack] ");
+					// for (i = sym_stack.p; i > -1; i--) {
+					// 	printf("%d ", sym_stack.data[i]);
+					// }
+					// printf("\n");
+					// printf("top = %d, sym_stack.p = %d\n", top, sym_stack.p);
+					// exit(1);
+				}
+				getsym();
+			}
+
+			// if (sym_stack.p < 0) { // ·ûºÅÕ»¿Õ
+			// 	// ºóĞø²¿·ÖÖ÷ÒªÓÃÓÚ´úÂëÉú³É
+			// 	code[mk->address].a = cx;
+			// 	mk->address = cx;
+			// 	cx0 = cx;
+			// 	gen(INT, 0, dx);
+			// 	set1 = createset(SYM_SEMICOLON, SYM_END, SYM_NULL);
+			// 	set = uniteset(set1, fsys);
+
+			// 	statement(set); // Óï¾ä
+
+			// 	destroyset(set1);
+			// 	destroyset(set);
+			// 	gen(OPR, 0, OPR_RET); // return
+			// 	test(fsys, phi, 8); // test for error: Follow the statement is an incorrect symbol.
+			// 	listcode(cx0, cx); // ¿ØÖÆÌ¨ÏÔÊ¾Éú³É´úÂë£¿
+			// }
 		}
+		// printf("sym stack empty?");
+		// exit(0);
+		
 		// ºóĞø²¿·ÖÖ÷ÒªÓÃÓÚ´úÂëÉú³É
 		code[mk->address].a = cx;
 		mk->address = cx;
@@ -639,7 +669,7 @@ void block(symset fsys){//µİ¹éÏÂ½µ·¨ÖĞ¶Ô<³ÌĞòÌå>µÄ´¦Àí ¡¾ÊµÑéÈı¡¿Ö»ĞèÒªĞŞ¸Ä´Ëº¯Ê
 		gen(OPR, 0, OPR_RET); // return
 		test(fsys, phi, 8); // test for error: Follow the statement is an incorrect symbol.
 		listcode(cx0, cx); // ¿ØÖÆÌ¨ÏÔÊ¾Éú³É´úÂë£¿
-	}
+	} while (inset(sym, declbegsys));
 
 	// printf("%d\n", sym);
 
@@ -905,6 +935,8 @@ void main (){
 
 	// ·ÇÖÕ½á·û¼¯
 	left_sym = createset(SYM_BLOCK, SYM_A, SYM_B, SYM_NULL);
+	// blockÖĞµÄÈıÖÖ×´Ì¬
+	block_status_set = createset(SYM_CONST, SYM_VAR, SYM_PROCEDURE);
 
     /*
 	err ´Ê·¨£¨/Óï·¨£¿£©´íÎóÊı

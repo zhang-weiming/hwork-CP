@@ -360,7 +360,7 @@ void constdeclaration(){//常量填入符号表
 		if (sym == SYM_EQU || sym == SYM_BECOMES){ // EQU = || BECOMES :=
 			if (sym == SYM_BECOMES)
 				error(1); // Found ':=' when expecting '='.
-			getsym(); // 获取'='后面的数字（数值），保存在num
+			getsym(); // 获取 '=' or ':=' 后面的数字（数值），保存在num
 			if (sym == SYM_NUMBER) {//全局变量num中存有已识别的数字
 				enter(ID_CONSTANT); // 将当前字段（已识别为常量部分）加入符号表
 				getsym(); // 继续获取下一个字符，可能是','或';'
