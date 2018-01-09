@@ -17,11 +17,11 @@
 enum symtype {
 	/* 0 */		SYM_NULL,	
 	/* 1 */		SYM_BLOCK,	
-	/* 2 */		SYM_A,		
-	/* 3 */		SYM_A1,	
-	/* 4 */		SYM_B,	
-	/* 5 */		SYM_B1,	
-	/* 6 */		SYM_C,	
+	/* 2 */		SYM_C,		
+	/* 3 */		SYM_C1,	
+	/* 4 */		SYM_V,	
+	/* 5 */		SYM_V1,	
+	/* 6 */		SYM_P,	
 	/* 7 */		SYM_IDENTIFIER,	
 	/* 8 */		SYM_NUMBER,	
 	/* 9 */		SYM_PLUS,	
@@ -50,7 +50,9 @@ enum symtype {
 	/* 32 */	SYM_CALL,	
 	/* 33 */	SYM_CONST,	
 	/* 34 */	SYM_VAR,	
-	/* 35 */	SYM_PROCEDURE
+	/* 35 */	SYM_PROCEDURE,
+	/* 36 */	SYM_STACK_BOTTOM,
+	/* 37 */	SYM_STMT
 };
 enum idtype {
 	ID_CONSTANT, ID_VARIABLE, ID_PROCEDURE
@@ -62,10 +64,6 @@ enum oprcode {
 	OPR_RET, OPR_NEG, OPR_ADD, OPR_MIN,	OPR_MUL, OPR_DIV, OPR_ODD, OPR_EQU,
 	OPR_NEQ, OPR_LES, OPR_LEQ, OPR_GTR,	OPR_GEQ
 };
-// // 新增非终结符集
-// enum left_symtype {
-// 	SYM_BLOCK, SYM_A, SYM_B
-// };
 typedef struct {
 	int f; // function code
 	int l; // level
@@ -147,34 +145,33 @@ char csym[NSYM + 1] = {
 };
 
 // 产生式右部
-int block_const_right[3] = {
-	SYM_A, SYM_B, SYM_C
+int production1[4] = {
+	SYM_C, SYM_V, SYM_P, SYM_STMT
 };
-int block_var_right[4] = {
-	SYM_VAR, SYM_IDENTIFIER, SYM_B, SYM_SEMICOLON
+int production2[6] = {
+	SYM_CONST, SYM_IDENTIFIER, SYM_EQU, SYM_NUMBER, SYM_C1, SYM_SEMICOLON
 };
-int block_procedure_right[5] = {
-	SYM_PROCEDURE, SYM_IDENTIFIER, SYM_SEMICOLON, SYM_BLOCK, SYM_SEMICOLON
-};
-int A_comma_right[5] = {
-	SYM_COMMA, SYM_IDENTIFIER, SYM_EQU, SYM_NUMBER, SYM_A
-};
-int A_e_right[1] = {
+int production3[1] = {
 	SYM_NULL
 };
-int B_comma_right[3] = {
-	SYM_COMMA, SYM_IDENTIFIER, SYM_B
+int production4[5] = {
+	SYM_COMMA, SYM_IDENTIFIER, SYM_EQU, SYM_NUMBER, SYM_C1
 };
-int B_e_right[1] = {
-	SYM_NULL
+int production6[4] = {
+	SYM_VAR, SYM_IDENTIFIER, SYM_V1, SYM_SEMICOLON
+};
+int production8[3] = {
+	SYM_COMMA, SYM_IDENTIFIER, SYM_V1
+};
+int production10[6] = {
+	SYM_PROCEDURE, SYM_IDENTIFIER, SYM_SEMICOLON, SYM_BLOCK, SYM_SEMICOLON, SYM_P
 };
 struct Production {
-	int right[10];
+	int right[20];
 	int length;
-}ll1_table[10][40], elem;
-int block_status;
-// ll1文法表
-// struct Production ll1_table[3][5];
+} ll1_table[10][40], elem; // ll1表
+int block_status; // 当前处于哪种定义
+
 
 #define MAXINS   8
 
@@ -206,4 +203,10 @@ typedef struct {
 	int data[50];
 	int p;
 } Stack;
-Stack sym_stack;
+Stack *sym_stack;
+
+typedef struct {
+	Stack *stack[30];
+	int block_dimen;
+} Stack_of_stack;
+Stack_of_stack *block_stack;

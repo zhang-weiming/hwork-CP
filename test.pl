@@ -1,3 +1,18 @@
 const m = 7, n = 85;
 var x, y, z, q, r;
-procedure multiply;.
+procedure multiply;
+var a, b;
+begin
+    a := x; b := y; z := 0;
+    while b > 0 do
+    begin
+        if odd b then z := z + a;
+        a := 2 * a; b := b / 2;
+    end
+end;
+
+begin
+    x := m; y := n; call multiply;
+    x := 25; y := 3;
+    x := 34; y := 36;
+end.

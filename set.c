@@ -95,6 +95,20 @@ int inset(int elem, symset s){//判断elem是否在s中
 		return 0;
 } // inset
 
+void rm_from_set(int elem, symset s) { // 删除一个元素
+	snode *p;
+
+	// s = s -> next;
+	while (s->next && s->next->elem < elem) {
+		s = s->next;
+	}
+	while (s->next && s->next->elem == elem) {
+		p = s->next;
+		s->next = s->next->next;
+		free(p);
+	}
+}
+
 void printset(symset s) {
 	s = s->next;
 	while (s) {

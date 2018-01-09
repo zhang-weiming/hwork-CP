@@ -5,63 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "set.h"
-#include "main1.h"
-
-/**
- * ³õÊ¼»¯ll1ÎÄ·¨±í
-*/
-void init_ll1_table() {
-	snode *p;
-	symset set;
-	
-	set = uniteset(declbegsys, statbegsys);
-	// block -> ...
-	p = set;
-	while (p = p->next) {
-		memcpy(ll1_table[SYM_BLOCK][p->elem].right, production1, sizeof(int) * 4);
-		ll1_table[SYM_BLOCK][p->elem].length = 4;
-	}
-	// C -> ...
-	memcpy(ll1_table[SYM_C][SYM_CONST].right, production2, sizeof(int) * 6);
-	ll1_table[SYM_C][SYM_CONST].length = 6;
-	rm_from_set(SYM_CONST, set);
-	p = set;
-	while (p = p->next) {
-		memcpy(ll1_table[SYM_C][p->elem].right, production3, sizeof(int) * 1);
-		ll1_table[SYM_C][p->elem].length = 1;
-	}
-	// C1 -> ...
-	memcpy(ll1_table[SYM_C1][SYM_COMMA].right, production4, sizeof(int) * 5);
-	ll1_table[SYM_C1][SYM_COMMA].length = 5;
-	memcpy(ll1_table[SYM_C1][SYM_SEMICOLON].right, production3, sizeof(int) * 1);
-	ll1_table[SYM_C1][SYM_SEMICOLON].length = 1;
-	// V -> ...
-	memcpy(ll1_table[SYM_V][SYM_VAR].right, production6, sizeof(int) * 4);
-	ll1_table[SYM_V][SYM_VAR].length = 4;
-	rm_from_set(SYM_VAR, set);
-	p = set;
-	while (p = p->next) {
-		memcpy(ll1_table[SYM_V][p->elem].right, production3, sizeof(int) * 1);
-		ll1_table[SYM_V][p->elem].length = 1;
-	}
-	// V1 -> ...
-	memcpy(ll1_table[SYM_V1][SYM_COMMA].right, production8, sizeof(int) * 3);
-	ll1_table[SYM_V1][SYM_COMMA].length = 3;
-	memcpy(ll1_table[SYM_V1][SYM_SEMICOLON].right, production3, sizeof(int) * 1);
-	ll1_table[SYM_V1][SYM_SEMICOLON].length = 1;
-	// P -> ...
-	memcpy(ll1_table[SYM_P][SYM_PROCEDURE].right, production10, sizeof(int) * 6);
-	ll1_table[SYM_P][SYM_PROCEDURE].length = 6;
-	rm_from_set(SYM_PROCEDURE, set);
-	p = set;
-	while (p = p->next) {
-		memcpy(ll1_table[SYM_P][p->elem].right, production3, sizeof(int) * 1);
-		ll1_table[SYM_P][p->elem].length = 1;
-	}
-	destroyset(set);
-
-	// printf("initialize the table for ll1.\n");
-}
+#include "pl0.h"
 
 //////////////////////////////////////////////////////////////////////
 // print error message.
@@ -83,6 +27,11 @@ void error(int n) {
 void getch(void){
 	if (cc == ll) { //»º³ålineÏûºÄÍê,ĞèÔÙ¶ÁÈëÒ»ĞĞ£¨¸ÃĞĞ´¦Àí½áÊø£©
 		int ii;
+		// printf("\n\t");
+		// for (ii = 0; ii < ll; ii++) {
+		// 	printf("%c(%d) ", line[ii], line[ii]);
+		// }
+		// printf("\n");
 
 		if (feof(infile)){
 			printf("\n[Error] PROGRAM INCOMPLETE\n");
@@ -213,50 +162,20 @@ void getsym(void) {
 			state = 0;
 			break;
 		case 7: // other tokens
-			if (anno) { // ×¢ÊÍ¿éÄÚ
-				if (ch == '*') {
-					getch();
-					if (ch == ')') { // Á¬ĞøµÄ '*' ')'
-						anno = 0; // ×¢ÊÍ½áÊø
-						getch();
-						getsym(); // »ñÈ¡×¢ÊÍ¿éºóÃæµÄµÚÒ»¸ötoken
-						state = 0;
-					} else {
-						state = 7; // ¼ÌĞøÔ­µØÌø×ª
-					}
-				} else {
-					getch();
-					state = 7;
-				}
-			} else { // ×¢ÊÍ¿éÍâ
-				i = NSYM;
-				csym[0] = ch;
-				while (csym[i--] != ch) ;
-				if (++i) {
-					sym = ssym[i];
-					getch();
-				} else {
-					printf("Fatal Error: Unknown character. [%d]\n", ch);
-					exit(1);
-				}
-				if (sym == SYM_LPAREN) { // '('
-					// getch();
-					if (ch == '*') { // Á¬ĞøµÄ '(' '*'
-						sym = SYM_NULL;
-						anno = 1;
-						getch();
-						state = 7; // Ô­µØÌø×ª
-					} else {
-						getch();
-						state = 0;
-					}
-				} else {
-					state = 0;
-				}
+			i = NSYM;
+			csym[0] = ch;
+			while (csym[i--] != ch) ;
+			if (++i) { // + - µÈµÈÖĞµÄÒ»¸ö
+				sym = ssym[i];
+				getch();
+			} else {
+				printf("Fatal Error: Unknown character. %d[%c]\n", ch, ch);
+				exit(1);
 			}
+			state = 0;
 			break;
-		} // switch
-	} // while
+		}
+	}
 } // getsym
 
 //////////////////////////////////////////////////////////////////////
@@ -334,7 +253,7 @@ void constdeclaration(){//³£Á¿ÌîÈë·ûºÅ±í
 		if (sym == SYM_EQU || sym == SYM_BECOMES){ // EQU = || BECOMES :=
 			if (sym == SYM_BECOMES)
 				error(1); // Found ':=' when expecting '='.
-			getsym(); // »ñÈ¡'='ºóÃæµÄÊı×Ö£¨ÊıÖµ£©£¬±£´æÔÚnum
+			getsym(); // »ñÈ¡ '=' or ':=' ºóÃæµÄÊı×Ö£¨ÊıÖµ£©£¬±£´æÔÚnum
 			if (sym == SYM_NUMBER) {//È«¾Ö±äÁ¿numÖĞ´æÓĞÒÑÊ¶±ğµÄÊı×Ö
 				enter(ID_CONSTANT); // ½«µ±Ç°×Ö¶Î£¨ÒÑÊ¶±ğÎª³£Á¿²¿·Ö£©¼ÓÈë·ûºÅ±í
 				getsym(); // ¼ÌĞø»ñÈ¡ÏÂÒ»¸ö×Ö·û£¬¿ÉÄÜÊÇ','»ò';'
@@ -620,8 +539,6 @@ void statement(symset fsys){ //µİ¹éÏÂ½µ·¨ÖĞ¶Ô<Óï¾ä>µÄ´¦Àí
 //////////////////////////////////////////////////////////////////////
 void block(symset fsys){//µİ¹éÏÂ½µ·¨ÖĞ¶Ô<³ÌĞòÌå>µÄ´¦Àí ¡¾ÊµÑéÈı¡¿Ö»ĞèÒªĞŞ¸Ä´Ëº¯Êı£¬ÒâË¼ÊÇÖ»ĞèÒª¸ÄĞ´¡°³ÌĞòÌå¡±²¿·Ö
 	int cx0; // initial code index
-	int top; //·ûºÅÕ»Õ»¶¥ÔªËØ
-	int i;
 
     // ºóĞø±äÁ¿¶¨ÒåÖ÷ÒªÓÃÓÚ´úÂëÉú³É
 	mask* mk;
@@ -636,84 +553,100 @@ void block(symset fsys){//µİ¹éÏÂ½µ·¨ÖĞ¶Ô<³ÌĞòÌå>µÄ´¦Àí ¡¾ÊµÑéÈı¡¿Ö»ĞèÒªĞŞ¸Ä´Ëº¯Ê
 		error(32); // There are too many levels. levelÊÇµİ¹éÖ®ÍâµÄÈ«¾Ö±äÁ¿
 	}
 
-	// Óï·¨
-	top = sym_stack -> data[sym_stack -> p];
-	do {
-		while (top == SYM_NULL) { // ÉÏ´ÎÍÆµ¼³ö²úÉúÊ½ÓÒ²¿Îª¿Õ£¬ÔòÈ¥³ıÕ»¶¥µÄÕ¼Î»·û
-			sym_stack -> p--;
-			top = sym_stack -> data[sym_stack -> p];
-		}
-		if (inset(top, left_sym)) { // topÊÇ·ÇÖÕ½á·û
-			sym_stack -> p--;
-			elem = ll1_table[top][sym];
-			for (i = elem.length - 1; i >= 0; i--) {
-				sym_stack -> p++;
-				sym_stack -> data[sym_stack -> p] = elem.right[i];
-			}
-			if (inset(ll1_table[top][sym].right[0], block_status_set)) {
-				block_status = ll1_table[top][sym].right[0];
-			} else {
-				// test?
-			}
-		} else {
-			if (top == SYM_STMT) { // Óï¾ä
-				sym_stack -> p--;
-				// ºóĞø²¿·ÖÖ÷ÒªÓÃÓÚ´úÂëÉú³É
-				code[mk->address].a = cx;
-				mk->address = cx;
-				cx0 = cx;
-				gen(INT, 0, dx);
-				set1 = createset(SYM_SEMICOLON, SYM_END, SYM_NULL);
-				set = uniteset(set1, fsys);
+	// Óï·¨·ÖÎö¿ªÊ¼
+	do{
+		if (sym == SYM_CONST){ // constant declarations
+			getsym(); // »ñÈ¡const×Ö¶ÎºóÃæ³öÏÖµÄµÚÒ»¸ö³£Á¿·ûºÅid1
+			do{//Ñ­»·´¦Àíid1=num1,id2=num2,¡­¡­
+				constdeclaration(); // ´¦Àíconst×Ö¶ÎÖ®ºóµÄµÚÒ»×é³£Á¿¶¨Òåid1=num1
+				while (sym == SYM_COMMA){ // ÉÏÒ»×é³£Á¿¶¨Òå´úÂë¶Î£¨ÉÏÒ»ĞĞÖĞµÄº¯ÊıÄÚ²¿Âß¼­£©×îºóÒ»´ÎÔËĞĞgetsym()º¯ÊıÊ±²¶»ñÁËÒ»¸ö','
+					getsym(); // ²¶»ñÒ»¸ö³£Á¿Ãû id
+					constdeclaration();
+				}// Ñ­»·½áÊøÌõ¼şÊÇ²¶»ñµ½';'£¬Ò²ÒâÎ¶×Å±¾×éÉùÃ÷½áÊø
+				if (sym == SYM_SEMICOLON){ // »ñÈ¡µ½·ÖºÅ';'
+					getsym(); // ¼ÌĞø»ñÈ¡';'ºóµÄÒ»¸ö×Ö¶Î
+				} else {
+					error(5); // Missing ',' or ';'.
+				}
+			}while (sym == SYM_IDENTIFIER); // ÎÊÌâ£º·ÖºÅºóÃæ²¶»ñµ½Ò»¸ö±êÊ¶·û£¬ÈÔÈ»ÊÇ³£Á¿¶¨Òå£¬ÕâÊÇÊ²Ã´ÒâË¼
+		} // if
 
-				statement(set); // Óï¾ä
+		if (sym == SYM_VAR)	{ // variable declarations
+			getsym(); // ÉÏÒ»´ÎÖ´ĞĞÒÑ¾­²¶»ñÁËÒ»¸ö "var"£¬Õâ´ÎÖ´ĞĞÓ¦¸Ã²¶»ñ±äÁ¿Ãû£¬´æ·ÅÔÚidÖĞ
+			do{
+				vardeclaration();
+				while (sym == SYM_COMMA){
+					getsym(); // ²¶»ñÏÂÒ»¸ö±äÁ¿Ãû¡£¿ÉÄÜ²¶»ñµ½·ÖºÅ';'£¬ËµÃ÷±äÁ¿ÉùÃ÷½áÊø
+					vardeclaration();
+				} // id1, id2, id3;
+				if (sym == SYM_SEMICOLON){ // ÉÏ´Î²¶»ñµ½';'£¬±äÁ¿ÉùÃ÷½áÊø
+					getsym(); // ¼ÌĞø²¶»ñÏÂÒ»¸ö×Ö¶Î
+				}else{
+					error(5); // Missing ',' or ';'.
+				}
+			}while (sym == SYM_IDENTIFIER);
+//			block = dx;
+		} // if
 
+		while (sym == SYM_PROCEDURE){ // procedure declarations
+			getsym(); // ²¶»ñ"procedure"Ö®ºóµÄµÚÒ»¸ö×Ö¶Î£¬¼´¹ı³ÌÃû
+			if (sym == SYM_IDENTIFIER){
+				enter(ID_PROCEDURE);
+				getsym(); // ²¶»ñ¹ı³ÌÃûºóÃæµÄ·ÖºÅ';'
+			}else{
+				error(4); // There must be an identifier to follow 'procedure'.
+			}
+
+			if (sym == SYM_SEMICOLON) { // ÉÏ´Î²¶»ñµÄÊÇ·ÖºÅ';'
+				getsym(); //¼ÌĞø²¶»ñÏÂÒ»¸ö×Ö¶Î¡£µÚÒ»´Î²¶»ñµÄÊÇµÚ4ĞĞµÄ"var"
+			}else{
+				error(5); // Missing ',' or ';'.
+			}
+			level++;//º¯Êı¿ÉÒÔÇ¶Ì×,levelÊÇº¯ÊıµÄÇ¶Ì×¼¶±ğ
+			savedTx = tx;
+			block_dx = dx;
+			set1 = createset(SYM_SEMICOLON, SYM_NULL);
+			set = uniteset(set1, fsys);
+			block(set);//Ç¶Ì×£¨µİ¹é£©µ÷ÓÃº¯Êı¶¨ÒåÖĞµÄ<³ÌĞòÌå>´¦Àíº¯Êıblock
+			destroyset(set1);
+			destroyset(set);
+			tx = savedTx;
+			level--;
+            dx = block_dx;
+
+			if (sym == SYM_SEMICOLON) {
+				getsym();
+				set1 = createset(SYM_IDENTIFIER, SYM_PROCEDURE, SYM_NULL);
+				set = uniteset(statbegsys, set1);
+				test(set, fsys, 6);
 				destroyset(set1);
 				destroyset(set);
-				gen(OPR, 0, OPR_RET); // return
-				test(set, phi, 8); // test for error: Follow the statement is an incorrect symbol.
-				listcode(cx0, cx); // ¿ØÖÆÌ¨ÏÔÊ¾Éú³É´úÂë£¿
-			} else {
-				if (top == sym) { // Æ¥Åä
-					sym_stack -> p--;
-					if (sym == SYM_PERIOD) {
-						printf("yes, get '.'. and stack %d\n", sym_stack -> data[sym_stack -> p]);
-					}
-					switch (block_status) {
-					case SYM_CONST:
-						if (top == SYM_NUMBER) {
-							enter(ID_CONSTANT);
-						}
-						break;
-					case SYM_VAR:
-						if (top == SYM_IDENTIFIER) {
-							enter(ID_VARIABLE);
-						}
-						break;
-					case SYM_PROCEDURE:
-						if (sym == SYM_IDENTIFIER){
-							enter(ID_PROCEDURE);
-						}
-						break;
-					}
-				} else { // ³ö´í
-					printf("top: %d, sym: %d\n", top, sym);
-					set1 = createset(SYM_IDENTIFIER, SYM_NULL);
-					set = uniteset(statbegsys, set1);
-					test(set, declbegsys, 7); // Õâ¸öÓĞÊ²Ã´×÷ÓÃ£¿ÔÚÓï·¨´íÎó³öÏÖÊ±£¬Ìø¹ı´íÎó²¿·Ö£¬¼ÌĞøÊ¶±ğºóĞøÓï·¨ÕıÈ·²¿·Ö
-					destroyset(set1);
-					destroyset(set);
-				}
-				getsym();
+			}else{
+				error(5); // Missing ',' or ';'.
 			}
-		} // if
-	} while ((top = sym_stack -> data[sym_stack -> p]) != SYM_STACK_BOTTOM && sym_stack -> p >= 0);
-	
-	set1 = createset(SYM_IDENTIFIER, SYM_PERIOD, SYM_NULL);
-	set = uniteset(statbegsys, set1);
-	test(set, declbegsys, 7); // ÔÚÓï·¨´íÎó³öÏÖÊ±£¬Ìø¹ı´íÎó²¿·Ö£¬¼ÌĞøÊ¶±ğºóĞøÓï·¨ÕıÈ·²¿·Ö
+		} // while
+		set1 = createset(SYM_IDENTIFIER, SYM_NULL);
+		set = uniteset(statbegsys, set1);
+		test(set, declbegsys, 7); // Õâ¸öÓĞÊ²Ã´×÷ÓÃ£¿ÔÚÓï·¨´íÎó³öÏÖÊ±£¬Ìø¹ı´íÎó²¿·Ö£¬¼ÌĞøÊ¶±ğºóĞøÓï·¨ÕıÈ·²¿·Ö
+		destroyset(set1);
+		destroyset(set);
+	}while (inset(sym, declbegsys)); // ¸Õ¸Õ²¶»ñµ½µÄÊÇ'const' 'var' 'procedure' 'Null'ÖĞµÄÒ»¸ö
+
+	// ºóĞø²¿·ÖÖ÷ÒªÓÃÓÚ´úÂëÉú³É
+	code[mk->address].a = cx;
+	mk->address = cx;
+	cx0 = cx;
+	gen(INT, 0, dx);
+	set1 = createset(SYM_SEMICOLON, SYM_END, SYM_NULL);
+	set = uniteset(set1, fsys);
+
+	statement(set); // Óï¾ä
+
 	destroyset(set1);
 	destroyset(set);
+	gen(OPR, 0, OPR_RET); // return
+	test(fsys, phi, 8); // test for error: Follow the statement is an incorrect symbol.
+	listcode(cx0, cx); // ¿ØÖÆÌ¨ÏÔÊ¾Éú³É´úÂë£¿
 } // block
 
 //////////////////////////////////////////////////////////////////////
@@ -845,16 +778,6 @@ void main (){
 	int i;
 	symset set, set1, set2;
 
-	// ³õÊ¼»¯·ûºÅÕ»
-	sym_stack = (Stack *) malloc(sizeof(Stack));
-	sym_stack -> p = 0;
-	sym_stack -> data[0] = SYM_STACK_BOTTOM;
-	sym_stack -> p++;
-	sym_stack -> data[sym_stack->p] = SYM_BLOCK;
-	// Ò»Ğ©set
-	left_sym = createset(SYM_BLOCK, SYM_C, SYM_C1, SYM_V, SYM_V1, SYM_P, SYM_NULL); // ·ÇÖÕ½á·û¼¯
-	block_status_set = createset(SYM_CONST, SYM_VAR, SYM_PROCEDURE); // blockÖĞµÄÈıÖÖ×´Ì¬
-
 	printf("Please input source file name: "); // get file name to be compiled
 	scanf("%s", s);
 	if ((infile = fopen(s, "r")) == NULL){
@@ -869,11 +792,6 @@ void main (){
 	declbegsys = createset(SYM_CONST, SYM_VAR, SYM_PROCEDURE, SYM_NULL);
 	statbegsys = createset(SYM_BEGIN, SYM_CALL, SYM_IF, SYM_WHILE, SYM_NULL);
 	facbegsys = createset(SYM_IDENTIFIER, SYM_NUMBER, SYM_LPAREN, SYM_NULL);
-
-
-	// ³õÊ¼»¯ll1±í
-	init_ll1_table();
-
 
     /*
 	err ´Ê·¨£¨/Óï·¨£¿£©´íÎóÊı
@@ -900,9 +818,7 @@ void main (){
 	destroyset(statbegsys);
 	destroyset(facbegsys);
 
-	free(sym_stack);
-
-// system("pause");
+system("pause");
 
 // ºóĞø´úÂëÓÃÓÚ½âÊÍÖ´ĞĞÖĞ¼ä´úÂë
 /*

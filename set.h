@@ -7,7 +7,7 @@ typedef struct snode {
 } snode, *symset;
 
 symset phi, declbegsys, statbegsys, facbegsys, relset;
-symset left_sym, block_status_set;
+symset left_sym, block_status_set;//  block_predict_set, C_e_predict_set, block_predict_set; // 暂时不要的 block_status_set, 
 
 symset createset(int data, .../* SYM_NULL */);
 void destroyset(symset s);
