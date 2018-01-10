@@ -60,29 +60,27 @@ void getsym(void) {
 	int i, k, state;
 	char a[MAXIDLEN + 1];//a[11] µ¥´Ê£¨ÁÙÊ±´æ·Å»º³å£©
 
-	// getsym()µÚÒ»´ÎÔËĞĞÊ±£¬chµÄÖµÊÇ±»ÉùÃ÷µ«Î´¶¨Òå×´Ì¬ÏÂµÄÖµNull£¬asciiÂëÎª0
 	while (ch == ' ')//ºöÂÔ¿Õ°×£¬»ñÈ¡µ±Ç°ĞĞ¶ÁÈ¡»º³åÖĞµÚÒ»¸ö·Ç¿Õ¸ñµÄ×Ö·û
 		getch();
 
 	state = 1;
 	k = num = anno = 0;
-	// sym = SYM_NULL;
 	while (state != 0) {
 		switch(state) {
-		case 1: // ³õÊ¼×´Ì¬£¿¸Õ¶ÁÈ¡ÁËµÚÒ»¸ö×Ö·û
+		case 1: // ³õÊ¼×´Ì¬
 			if (isalpha(ch)) { // ÒÔ×ÖÄ¸¿ªÍ·£¬¿ÉÄÜÊÇ¹Ø¼ü×Ö»ò±êÊ¶·û
 				a[k++] = ch;
 				getch();
 				state = 2;
-			} else if (isdigit(ch)) { // ÒÔÊı×Ö¿ªÍ·£¬Ó¦¸ÃÊÇÊı
-				sym = SYM_NUMBER; // È·¶¨ÊÇÊı
+			} else if (isdigit(ch)) { // ÒÔÊı×Ö¿ªÍ·£¬È·¶¨ÊÇÊı
+				sym = SYM_NUMBER;
 				num = num * 10 + ch - '0';
 				if (++k > MAXNUMLEN) {
-					error(25); // £¨´òÓ¡»¹ÊÇ¼ÇÂ¼£¿£©³ö´íĞÅÏ¢
+					error(25); // ³ö´í£º³¤¶È¹ı´ó
 					state = 0;
 				} else {
 					getch();
-					state = 3; // Õâ¸öÌø×ªÊÇÔ­µØÌø×ª
+					state = 3; // Ô­µØÌø×ª
 				}
 			} else if (ch == ':') {
 				getch();
@@ -98,38 +96,36 @@ void getsym(void) {
 			}
 			break;
 		case 2:
-			if (isalpha(ch) || isdigit(ch)) { // ×é³É²¿·Ö ×ÖÄ¸»òÊı×Ö
+			if (isalpha(ch) || isdigit(ch)) {
 				a[k++] = ch;
 				getch();
 				state = 2; // Ô­µØÌø×ª
-			} else { // ×Ö¶Î²¶»ñ½áÊø£¬ÏÖÔÚÈ·¶¨ÀàĞÍ
+			} else { // ×Ö¶Î²¶»ñ½áÊø£¬ÏÖÔÚÈ·¶¨ÀàĞÍ£¨¹Ø¼ü×Ö or ±êÊ¶·û£©
 				a[k] = 0; // Ìí¼Ó×Ö·û´®½áÊø·û
 				strcpy(id, a);
 				word[0] = id;
 				i = NRW;
 				while (strcmp(id, word[i--])) ;
-				if (++i) { // ¹Ø¼ü×Ö
+				if (++i) { // È·¶¨Îª¹Ø¼ü×Ö
 					sym = wsym[i];
-				} else { // ±êÊ¶·û
+				} else { // È·¶¨Îª±êÊ¶·û
 					sym = SYM_IDENTIFIER;
 				}
-				state = 0;
+				state = 0; // ½ÓÊÕ
 			}
 			break;
 		case 3:
 			if (isdigit(ch)) {
 				num = num * 10 + ch - '0';
 				if (++k > MAXNUMLEN) {
-					error(25); // £¨´òÓ¡»¹ÊÇ¼ÇÂ¼£¿£©³ö´íĞÅÏ¢
+					error(25); // ³ö´í£º³¤¶È¹ı´ó
 					getch();
-					// state = 0;
-					// printf("×´Ì¬Îª0£¿£¿");
 				} else {
 					getch();
 					state = 3; // Ô­µØÌø×ª
 				}
 			} else {
-				state = 0;
+				state = 0; // ½ÓÊÕ
 			}
 			break;
 		case 4: // ':'
@@ -139,7 +135,7 @@ void getsym(void) {
 			} else {
 				sym = SYM_NULL; // illegal?
 			}
-			state = 0;
+			state = 0; // ½ÓÊÕ
 			break;
 		case 5: // '>=' or '>'
 			if (ch == '=') {
@@ -148,7 +144,7 @@ void getsym(void) {
 				sym = SYM_GTR;
 			}
 			getch();
-			state = 0;
+			state = 0; // ½ÓÊÕ
 			break;
 		case 6: // '<=' or '<' or '<>'
 			if (ch == '=') {
@@ -159,50 +155,20 @@ void getsym(void) {
 				sym = SYM_LES;
 			}
 			getch();
-			state = 0;
+			state = 0; // ½ÓÊÕ
 			break;
 		case 7: // other tokens
-			if (anno) { // ×¢ÊÍ¿éÄÚ
-				if (ch == '*') {
-					getch();
-					if (ch == ')') { // Á¬ĞøµÄ '*' ')'
-						anno = 0; // ×¢ÊÍ½áÊø
-						getch();
-						getsym(); // »ñÈ¡×¢ÊÍ¿éºóÃæµÄµÚÒ»¸ötoken
-						state = 0;
-					} else {
-						state = 7; // ¼ÌĞøÔ­µØÌø×ª
-					}
-				} else {
-					getch();
-					state = 7;
-				}
-			} else { // ×¢ÊÍ¿éÍâ
-				i = NSYM;
-				csym[0] = ch;
-				while (csym[i--] != ch) ;
-				if (++i) {
-					sym = ssym[i];
-					getch();
-				} else {
-					printf("Fatal Error: Unknown character.\n");
-					exit(1);
-				}
-				if (sym == SYM_LPAREN) { // '('
-					// getch();
-					if (ch == '*') { // Á¬ĞøµÄ '(' '*'
-						sym = SYM_NULL;
-						anno = 1;
-						getch();
-						state = 7; // Ô­µØÌø×ª
-					} else {
-						getch();
-						state = 0;
-					}
-				} else {
-					state = 0;
-				}
+			i = NSYM;
+			csym[0] = ch;
+			while (csym[i--] != ch) ;
+			if (++i) { // + - µÈµÈÖĞµÄÒ»¸ö
+				sym = ssym[i];
+				getch();
+			} else { // ³ö´í£º²¶»ñµ½Î´Öª×Ö·û
+				printf("Fatal Error: Unknown character. %d[%c]\n", ch, ch);
+				exit(1);
 			}
+			state = 0; // ½ÓÊÕ
 			break;
 		}
 	}
@@ -230,7 +196,7 @@ void test(symset s1, symset s2, int n){//²Î¿¼µÚÒ»²¿·Ö2.6½Ú
 		// printf("sym = %d\n", sym);
 		// printset(s1);
 		s = uniteset(s1, s2);
-		while(! inset(sym, s)) // Ìø¹ıËùÓĞ·Ç¹Ø¼ü×ÖµÄtoken
+		while(! inset(sym, s))
 			getsym();
 		destroyset(s);
 	}
@@ -302,7 +268,7 @@ void constdeclaration(){//³£Á¿ÌîÈë·ûºÅ±í
 void vardeclaration(void){ //±äÁ¿ÌîÈë·ûºÅ±í
 	if (sym == SYM_IDENTIFIER) {
 		enter(ID_VARIABLE);
-		getsym(); // ²¶»ñÒ»¸ö ','£¨ÒòÎªÏÖÔÚÊÇÉùÃ÷½×¶Î£¬Ã»ÓĞ¸³Öµ£©£¬¿ÉÄÜ²¶»ñµ½·ÖºÅ
+		getsym(); // ²¶»ñÒ»¸ö ','£¨ÒòÎªÏÖÔÚÊÇÉùÃ÷½×¶Î£¬Ã»ÓĞ¸³Öµ£©
 	}else{
 		error(4); // There must be an identifier to follow 'var'.
 	}
@@ -475,7 +441,7 @@ void statement(symset fsys){ //µİ¹éÏÂ½µ·¨ÖĞ¶Ô<Óï¾ä>µÄ´¦Àí
 		if (! (i = position(id))){ // Ã»ÓĞÕÒµ½±äÁ¿Ãû
 			error(11); // Undeclared identifier.
 		}else if (table[i].kind != ID_VARIABLE){
-			error(12); // Illegal assignment. ¸Ã·ûºÅ²»ÊÇ±äÁ¿
+			error(12); // Illegal assignment.
 			i = 0;
 		}
 		getsym();
@@ -538,7 +504,7 @@ void statement(symset fsys){ //µİ¹éÏÂ½µ·¨ÖĞ¶Ô<Óï¾ä>µÄ´¦Àí
 		} // while
 		destroyset(set1);
 		destroyset(set);
-		if (sym == SYM_END)	{ // begin - end ¿é½áÊø
+		if (sym == SYM_END)	{
 			getsym();
 		}else{
 			error(17); // ';' or 'end' expected.
@@ -606,7 +572,7 @@ void block(symset fsys){//µİ¹éÏÂ½µ·¨ÖĞ¶Ô<³ÌĞòÌå>µÄ´¦Àí ¡¾ÊµÑéÈı¡¿Ö»ĞèÒªĞŞ¸Ä´Ëº¯Ê
 			do{
 				vardeclaration();
 				while (sym == SYM_COMMA){
-					getsym(); // ²¶»ñÏÂÒ»¸ö±äÁ¿Ãû¡£¿ÉÄÜ²¶»ñµ½·ÖºÅ';'£¨µ«ÕâÊôÓÚ³ö´íÇé¿ö£©£¬ËµÃ÷±äÁ¿ÉùÃ÷½áÊø
+					getsym(); // ²¶»ñÏÂÒ»¸ö±äÁ¿Ãû¡£¿ÉÄÜ²¶»ñµ½·ÖºÅ';'£¬ËµÃ÷±äÁ¿ÉùÃ÷½áÊø
 					vardeclaration();
 				} // id1, id2, id3;
 				if (sym == SYM_SEMICOLON){ // ÉÏ´Î²¶»ñµ½';'£¬±äÁ¿ÉùÃ÷½áÊø
@@ -617,12 +583,6 @@ void block(symset fsys){//µİ¹éÏÂ½µ·¨ÖĞ¶Ô<³ÌĞòÌå>µÄ´¦Àí ¡¾ÊµÑéÈı¡¿Ö»ĞèÒªĞŞ¸Ä´Ëº¯Ê
 			}while (sym == SYM_IDENTIFIER);
 //			block = dx;
 		} // if
-
-		// if (sym == SYM_VAR) {
-		// 	printf("yes, get another var.\n");
-		// } else {
-		// 	printf("no, it's not var. It is %d.\n", sym);
-		// }
 
 		while (sym == SYM_PROCEDURE){ // procedure declarations
 			getsym(); // ²¶»ñ"procedure"Ö®ºóµÄµÚÒ»¸ö×Ö¶Î£¬¼´¹ı³ÌÃû
@@ -649,13 +609,12 @@ void block(symset fsys){//µİ¹éÏÂ½µ·¨ÖĞ¶Ô<³ÌĞòÌå>µÄ´¦Àí ¡¾ÊµÑéÈı¡¿Ö»ĞèÒªĞŞ¸Ä´Ëº¯Ê
 			tx = savedTx;
 			level--;
             dx = block_dx;
-			// µ±Ç°µÄprocedure¶¨ÒåÖĞµÄblock²¿·Ö½áÊø£¬ºóÃæ½ô¸ú×ÅµÄÓ¦¸ÃÊÇ·ÖºÅ
+
 			if (sym == SYM_SEMICOLON) {
 				getsym();
-			
 				set1 = createset(SYM_IDENTIFIER, SYM_PROCEDURE, SYM_NULL);
 				set = uniteset(statbegsys, set1);
-				test(set, fsys, 6); // ¼ì²é²¶»ñµÄtokenÊÇ²»ÊÇ procedure »ò Óï¾äµÄÔ¤²â·û¼¯
+				test(set, fsys, 6);
 				destroyset(set1);
 				destroyset(set);
 			}else{
@@ -679,21 +638,11 @@ void block(symset fsys){//µİ¹éÏÂ½µ·¨ÖĞ¶Ô<³ÌĞòÌå>µÄ´¦Àí ¡¾ÊµÑéÈı¡¿Ö»ĞèÒªĞŞ¸Ä´Ëº¯Ê
 
 	statement(set); // Óï¾ä
 
-	// if (sym == SYM_SEMICOLON) {
-	// 	printf("yes, get ';'.");
-	// 	getsym();
-	// 	printf("next is %d\n", sym);
-	// 	exit(0);
-	// }
-
 	destroyset(set1);
 	destroyset(set);
 	gen(OPR, 0, OPR_RET); // return
 	test(fsys, phi, 8); // test for error: Follow the statement is an incorrect symbol.
 	listcode(cx0, cx); // ¿ØÖÆÌ¨ÏÔÊ¾Éú³É´úÂë£¿
-	
-	// printf("ÔİÍ£\n");
-	// exit(0);
 } // block
 
 //////////////////////////////////////////////////////////////////////

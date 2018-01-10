@@ -5,63 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "set.h"
-#include "main1.h"
-
-/**
- * 初始化ll1文法表
-*/
-void init_ll1_table() {
-	snode *p;
-	symset set;
-	
-	set = uniteset(declbegsys, statbegsys);
-	// block -> ...
-	p = set;
-	while (p = p->next) {
-		memcpy(ll1_table[SYM_BLOCK][p->elem].right, production1, sizeof(int) * 4);
-		ll1_table[SYM_BLOCK][p->elem].length = 4;
-	}
-	// C -> ...
-	memcpy(ll1_table[SYM_C][SYM_CONST].right, production2, sizeof(int) * 6);
-	ll1_table[SYM_C][SYM_CONST].length = 6;
-	rm_from_set(SYM_CONST, set);
-	p = set;
-	while (p = p->next) {
-		memcpy(ll1_table[SYM_C][p->elem].right, production3, sizeof(int) * 1);
-		ll1_table[SYM_C][p->elem].length = 1;
-	}
-	// C1 -> ...
-	memcpy(ll1_table[SYM_C1][SYM_COMMA].right, production4, sizeof(int) * 5);
-	ll1_table[SYM_C1][SYM_COMMA].length = 5;
-	memcpy(ll1_table[SYM_C1][SYM_SEMICOLON].right, production3, sizeof(int) * 1);
-	ll1_table[SYM_C1][SYM_SEMICOLON].length = 1;
-	// V -> ...
-	memcpy(ll1_table[SYM_V][SYM_VAR].right, production6, sizeof(int) * 4);
-	ll1_table[SYM_V][SYM_VAR].length = 4;
-	rm_from_set(SYM_VAR, set);
-	p = set;
-	while (p = p->next) {
-		memcpy(ll1_table[SYM_V][p->elem].right, production3, sizeof(int) * 1);
-		ll1_table[SYM_V][p->elem].length = 1;
-	}
-	// V1 -> ...
-	memcpy(ll1_table[SYM_V1][SYM_COMMA].right, production8, sizeof(int) * 3);
-	ll1_table[SYM_V1][SYM_COMMA].length = 3;
-	memcpy(ll1_table[SYM_V1][SYM_SEMICOLON].right, production3, sizeof(int) * 1);
-	ll1_table[SYM_V1][SYM_SEMICOLON].length = 1;
-	// P -> ...
-	memcpy(ll1_table[SYM_P][SYM_PROCEDURE].right, production10, sizeof(int) * 6);
-	ll1_table[SYM_P][SYM_PROCEDURE].length = 6;
-	rm_from_set(SYM_PROCEDURE, set);
-	p = set;
-	while (p = p->next) {
-		memcpy(ll1_table[SYM_P][p->elem].right, production3, sizeof(int) * 1);
-		ll1_table[SYM_P][p->elem].length = 1;
-	}
-	destroyset(set);
-
-	// printf("initialize the table for ll1.\n");
-}
+#include "pl0.h"
 
 //////////////////////////////////////////////////////////////////////
 // print error message.
@@ -83,6 +27,11 @@ void error(int n) {
 void getch(void){
 	if (cc == ll) { //缓冲line消耗完,需再读入一行（该行处理结束）
 		int ii;
+		// printf("\n\t");
+		// for (ii = 0; ii < ll; ii++) {
+		// 	printf("%c(%d) ", line[ii], line[ii]);
+		// }
+		// printf("\n");
 
 		if (feof(infile)){
 			printf("\n[Error] PROGRAM INCOMPLETE\n");
@@ -105,35 +54,33 @@ void getch(void){
 //////////////////////////////////////////////////////////////////////
 // 从输入读入一个词法符号，词法分析器
 void getsym(void) {
-	int ii, anno;
+	int ii, anno; // anno 为注释标识
 	char temp;
 
 	int i, k, state;
 	char a[MAXIDLEN + 1];//a[11] 单词（临时存放缓冲）
 
-	// getsym()第一次运行时，ch的值是被声明但未定义状态下的值Null，ascii码为0
 	while (ch == ' ')//忽略空白，获取当前行读取缓冲中第一个非空格的字符
 		getch();
 
 	state = 1;
 	k = num = anno = 0;
-	// sym = SYM_NULL;
 	while (state != 0) {
 		switch(state) {
-		case 1: // 初始状态？刚读取了第一个字符
+		case 1: // 初始状态
 			if (isalpha(ch)) { // 以字母开头，可能是关键字或标识符
 				a[k++] = ch;
 				getch();
 				state = 2;
-			} else if (isdigit(ch)) { // 以数字开头，应该是数
-				sym = SYM_NUMBER; // 确定是数
+			} else if (isdigit(ch)) { // 以数字开头，确定是数
+				sym = SYM_NUMBER;
 				num = num * 10 + ch - '0';
 				if (++k > MAXNUMLEN) {
-					error(25); // （打印还是记录？）出错信息
+					error(25); // 出错：长度过大
 					state = 0;
 				} else {
 					getch();
-					state = 3; // 这个跳转是原地跳转
+					state = 3; // 原地跳转
 				}
 			} else if (ch == ':') {
 				getch();
@@ -149,38 +96,36 @@ void getsym(void) {
 			}
 			break;
 		case 2:
-			if (isalpha(ch) || isdigit(ch)) { // 组成部分 字母或数字
+			if (isalpha(ch) || isdigit(ch)) {
 				a[k++] = ch;
 				getch();
 				state = 2; // 原地跳转
-			} else { // 字段捕获结束，现在确定类型
+			} else { // 字段捕获结束，现在确定类型（关键字 or 标识符）
 				a[k] = 0; // 添加字符串结束符
 				strcpy(id, a);
 				word[0] = id;
 				i = NRW;
 				while (strcmp(id, word[i--])) ;
-				if (++i) { // 关键字
+				if (++i) { // 确定为关键字
 					sym = wsym[i];
-				} else { // 标识符
+				} else { // 确定为标识符
 					sym = SYM_IDENTIFIER;
 				}
-				state = 0;
+				state = 0; // 接收
 			}
 			break;
 		case 3:
 			if (isdigit(ch)) {
 				num = num * 10 + ch - '0';
 				if (++k > MAXNUMLEN) {
-					error(25); // （打印还是记录？）出错信息
+					error(25); // 出错：长度过大
 					getch();
-					// state = 0;
-					// printf("状态为0？？");
 				} else {
 					getch();
 					state = 3; // 原地跳转
 				}
 			} else {
-				state = 0;
+				state = 0; // 接收
 			}
 			break;
 		case 4: // ':'
@@ -190,7 +135,7 @@ void getsym(void) {
 			} else {
 				sym = SYM_NULL; // illegal?
 			}
-			state = 0;
+			state = 0; // 接收
 			break;
 		case 5: // '>=' or '>'
 			if (ch == '=') {
@@ -199,7 +144,7 @@ void getsym(void) {
 				sym = SYM_GTR;
 			}
 			getch();
-			state = 0;
+			state = 0; // 接收
 			break;
 		case 6: // '<=' or '<' or '<>'
 			if (ch == '=') {
@@ -210,53 +155,53 @@ void getsym(void) {
 				sym = SYM_LES;
 			}
 			getch();
-			state = 0;
+			state = 0; // 接收
 			break;
 		case 7: // other tokens
 			if (anno) { // 注释块内
 				if (ch == '*') {
 					getch();
-					if (ch == ')') { // 连续的 '*' ')'
-						anno = 0; // 注释结束
+					if (ch == ')') { // 捕获到连续的 '*' ')'，表示注释块结束
+						anno = 0; // 注释标识置0
 						getch();
-						getsym(); // 获取注释块后面的第一个token
-						state = 0;
+						getsym(); // 识别注释块后面的下一个token
+						state = 0; // 接收
 					} else {
-						state = 7; // 继续原地跳转
+						state = 7; // 原地跳转
 					}
 				} else {
 					getch();
-					state = 7;
+					state = 7; // 原地跳转
 				}
 			} else { // 注释块外
 				i = NSYM;
 				csym[0] = ch;
 				while (csym[i--] != ch) ;
-				if (++i) {
+				if (++i) { // + - 等等中的一个
 					sym = ssym[i];
 					getch();
-				} else {
-					printf("Fatal Error: Unknown character. [%d]\n", ch);
+				} else { // 出错：捕获到未知字符
+					printf("Fatal Error: Unknown character.\n");
 					exit(1);
 				}
-				if (sym == SYM_LPAREN) { // '('
+				if (sym == SYM_LPAREN) { // 捕获到'('
 					// getch();
-					if (ch == '*') { // 连续的 '(' '*'
+					if (ch == '*') { // 捕获到连续的 '(' '*'，表示注释块开始
 						sym = SYM_NULL;
-						anno = 1;
+						anno = 1; // 注释标识置1
 						getch();
 						state = 7; // 原地跳转
 					} else {
 						getch();
-						state = 0;
+						state = 0; // 接收
 					}
 				} else {
-					state = 0;
+					state = 0; // 接收
 				}
 			}
 			break;
-		} // switch
-	} // while
+		}
+	}
 } // getsym
 
 //////////////////////////////////////////////////////////////////////
@@ -281,7 +226,7 @@ void test(symset s1, symset s2, int n){//参考第一部分2.6节
 		// printf("sym = %d\n", sym);
 		// printset(s1);
 		s = uniteset(s1, s2);
-		while(! inset(sym, s))
+		while(! inset(sym, s)) // 跳过所有非关键字的token
 			getsym();
 		destroyset(s);
 	}
@@ -334,7 +279,7 @@ void constdeclaration(){//常量填入符号表
 		if (sym == SYM_EQU || sym == SYM_BECOMES){ // EQU = || BECOMES :=
 			if (sym == SYM_BECOMES)
 				error(1); // Found ':=' when expecting '='.
-			getsym(); // 获取'='后面的数字（数值），保存在num
+			getsym(); // 获取 '=' or ':=' 后面的数字（数值），保存在num
 			if (sym == SYM_NUMBER) {//全局变量num中存有已识别的数字
 				enter(ID_CONSTANT); // 将当前字段（已识别为常量部分）加入符号表
 				getsym(); // 继续获取下一个字符，可能是','或';'
@@ -353,7 +298,7 @@ void constdeclaration(){//常量填入符号表
 void vardeclaration(void){ //变量填入符号表
 	if (sym == SYM_IDENTIFIER) {
 		enter(ID_VARIABLE);
-		getsym(); // 捕获一个 ','（因为现在是声明阶段，没有赋值）
+		getsym(); // 捕获一个 ','（因为现在是声明阶段，没有赋值），可能捕获到分号
 	}else{
 		error(4); // There must be an identifier to follow 'var'.
 	}
@@ -526,7 +471,7 @@ void statement(symset fsys){ //递归下降法中对<语句>的处理
 		if (! (i = position(id))){ // 没有找到变量名
 			error(11); // Undeclared identifier.
 		}else if (table[i].kind != ID_VARIABLE){
-			error(12); // Illegal assignment.
+			error(12); // Illegal assignment. 该符号不是变量
 			i = 0;
 		}
 		getsym();
@@ -589,7 +534,7 @@ void statement(symset fsys){ //递归下降法中对<语句>的处理
 		} // while
 		destroyset(set1);
 		destroyset(set);
-		if (sym == SYM_END)	{
+		if (sym == SYM_END)	{ // begin - end 块结束
 			getsym();
 		}else{
 			error(17); // ';' or 'end' expected.
@@ -618,10 +563,8 @@ void statement(symset fsys){ //递归下降法中对<语句>的处理
 } // statement
 			
 //////////////////////////////////////////////////////////////////////
-void block(symset fsys){
+void block(symset fsys){//递归下降法中对<程序体>的处理 【实验三】只需要修改此函数，意思是只需要改写“程序体”部分
 	int cx0; // initial code index
-	int top; //符号栈栈顶元素
-	int i;
 
     // 后续变量定义主要用于代码生成
 	mask* mk;
@@ -633,82 +576,120 @@ void block(symset fsys){
 	mk->address = cx;
 	gen(JMP, 0, 0);
 	if (level > MAXLEVEL){
-		error(32); // There are too many levels.
+		error(32); // There are too many levels. level是递归之外的全局变量
 	}
-	// 处理程序体开始
-	top = sym_stack -> data[sym_stack -> p]; // 提取符号栈栈顶元素
-	do {
-		while (top == SYM_NULL) { // 符号栈栈顶为空（占位符），则去除之
-			sym_stack -> p--;
-			top = sym_stack -> data[sym_stack -> p];
-		}
-		if (inset(top, left_sym)) { // 符号栈栈顶为非终结符，作相应推导
-			sym_stack -> p--;
-			elem = ll1_table[top][sym];
-			for (i = elem.length - 1; i >= 0; i--) {
-				sym_stack -> p++;
-				sym_stack -> data[sym_stack -> p] = elem.right[i];
-			}
-			if (inset(ll1_table[top][sym].right[0], block_status_set)) {
-				block_status = ll1_table[top][sym].right[0];
-			} else {
-				// test?
-			}
-		} else {
-			if (top == SYM_STMT) { // 符号栈栈顶为语句
-				sym_stack -> p--;
-				
-				code[mk->address].a = cx;
-				mk->address = cx;
-				cx0 = cx;
-				gen(INT, 0, dx);
-				set1 = createset(SYM_SEMICOLON, SYM_END, SYM_NULL);
-				set = uniteset(set1, fsys);
 
-				statement(set); // 调用递归下降法处理语句
+	// 语法分析开始
+	do{
+		if (sym == SYM_CONST){ // constant declarations
+			getsym(); // 获取const字段后面出现的第一个常量符号id1
+			do{//循环处理id1=num1,id2=num2,……
+				constdeclaration(); // 处理const字段之后的第一组常量定义id1=num1
+				while (sym == SYM_COMMA){ // 上一组常量定义代码段（上一行中的函数内部逻辑）最后一次运行getsym()函数时捕获了一个','
+					getsym(); // 捕获一个常量名 id
+					constdeclaration();
+				}// 循环结束条件是捕获到';'，也意味着本组声明结束
+				if (sym == SYM_SEMICOLON){ // 获取到分号';'
+					getsym(); // 继续获取';'后的一个字段
+				} else {
+					error(5); // Missing ',' or ';'.
+				}
+			}while (sym == SYM_IDENTIFIER); // 问题：分号后面捕获到一个标识符，仍然是常量定义，这是什么意思
+		} // if
 
+		if (sym == SYM_VAR)	{ // variable declarations
+			getsym(); // 上一次执行已经捕获了一个 "var"，这次执行应该捕获变量名，存放在id中
+			do{
+				vardeclaration();
+				while (sym == SYM_COMMA){
+					getsym(); // 捕获下一个变量名。可能捕获到分号';'（但这属于出错情况），说明变量声明结束
+					vardeclaration();
+				} // id1, id2, id3;
+				if (sym == SYM_SEMICOLON){ // 上次捕获到';'，变量声明结束
+					getsym(); // 继续捕获下一个字段
+				}else{
+					error(5); // Missing ',' or ';'.
+				}
+			}while (sym == SYM_IDENTIFIER);
+//			block = dx;
+		} // if
+
+		// if (sym == SYM_VAR) {
+		// 	printf("yes, get another var.\n");
+		// } else {
+		// 	printf("no, it's not var. It is %d.\n", sym);
+		// }
+
+		while (sym == SYM_PROCEDURE){ // procedure declarations
+			getsym(); // 捕获"procedure"之后的第一个字段，即过程名
+			if (sym == SYM_IDENTIFIER){
+				enter(ID_PROCEDURE);
+				getsym(); // 捕获过程名后面的分号';'
+			}else{
+				error(4); // There must be an identifier to follow 'procedure'.
+			}
+
+			if (sym == SYM_SEMICOLON) { // 上次捕获的是分号';'
+				getsym(); //继续捕获下一个字段。第一次捕获的是第4行的"var"
+			}else{
+				error(5); // Missing ',' or ';'.
+			}
+			level++;//函数可以嵌套,level是函数的嵌套级别
+			savedTx = tx;
+			block_dx = dx;
+			set1 = createset(SYM_SEMICOLON, SYM_NULL);
+			set = uniteset(set1, fsys);
+			block(set);//嵌套（递归）调用函数定义中的<程序体>处理函数block
+			destroyset(set1);
+			destroyset(set);
+			tx = savedTx;
+			level--;
+            dx = block_dx;
+			// 当前的procedure定义中的block部分结束，后面紧跟着的应该是分号
+			if (sym == SYM_SEMICOLON) {
+				getsym();
+			
+				set1 = createset(SYM_IDENTIFIER, SYM_PROCEDURE, SYM_NULL);
+				set = uniteset(statbegsys, set1);
+				test(set, fsys, 6); // 检查捕获的token是不是 procedure 或 语句的预测符集
 				destroyset(set1);
 				destroyset(set);
-				gen(OPR, 0, OPR_RET); // return
-				test(set, phi, 8); // test for error: Follow the statement is an incorrect symbol.
-				listcode(cx0, cx);
-			} else {
-				if (top == sym) { // 匹配，符号填入符号表，弹出符号栈栈顶符号
-					sym_stack -> p--;
-					switch (block_status) {
-					case SYM_CONST:
-						if (top == SYM_NUMBER) {
-							enter(ID_CONSTANT);
-						}
-						break;
-					case SYM_VAR:
-						if (top == SYM_IDENTIFIER) {
-							enter(ID_VARIABLE);
-						}
-						break;
-					case SYM_PROCEDURE:
-						if (sym == SYM_IDENTIFIER){
-							enter(ID_PROCEDURE);
-						}
-						break;
-					}
-				} else { // 出错
-					set1 = createset(SYM_IDENTIFIER, SYM_NULL);
-					set = uniteset(statbegsys, set1);
-					test(set, declbegsys, 7);
-					destroyset(set1);
-					destroyset(set);
-				}
-				getsym(); // 捕获下一个token
+			}else{
+				error(5); // Missing ',' or ';'.
 			}
-		} // if
-	} while ((top = sym_stack -> data[sym_stack -> p]) != SYM_STACK_BOTTOM && sym_stack -> p >= 0);
-	
-	set1 = createset(SYM_IDENTIFIER, SYM_PERIOD, SYM_NULL);
-	set = uniteset(statbegsys, set1);
-	test(set, declbegsys, 7); // 在语法错误出现时，跳过错误部分，继续识别后续语法正确部分
+		} // while
+		set1 = createset(SYM_IDENTIFIER, SYM_NULL);
+		set = uniteset(statbegsys, set1);
+		test(set, declbegsys, 7); // 这个有什么作用？在语法错误出现时，跳过错误部分，继续识别后续语法正确部分
+		destroyset(set1);
+		destroyset(set);
+	}while (inset(sym, declbegsys)); // 刚刚捕获到的是'const' 'var' 'procedure' 'Null'中的一个
+
+	// 后续部分主要用于代码生成
+	code[mk->address].a = cx;
+	mk->address = cx;
+	cx0 = cx;
+	gen(INT, 0, dx);
+	set1 = createset(SYM_SEMICOLON, SYM_END, SYM_NULL);
+	set = uniteset(set1, fsys);
+
+	statement(set); // 语句
+
+	// if (sym == SYM_SEMICOLON) {
+	// 	printf("yes, get ';'.");
+	// 	getsym();
+	// 	printf("next is %d\n", sym);
+	// 	exit(0);
+	// }
+
 	destroyset(set1);
 	destroyset(set);
+	gen(OPR, 0, OPR_RET); // return
+	test(fsys, phi, 8); // test for error: Follow the statement is an incorrect symbol.
+	listcode(cx0, cx); // 控制台显示生成代码？
+	
+	// printf("暂停\n");
+	// exit(0);
 } // block
 
 //////////////////////////////////////////////////////////////////////
@@ -840,16 +821,6 @@ void main (){
 	int i;
 	symset set, set1, set2;
 
-	// 初始化符号栈
-	sym_stack = (Stack *) malloc(sizeof(Stack));
-	sym_stack -> p = 0;
-	sym_stack -> data[0] = SYM_STACK_BOTTOM;
-	sym_stack -> p++;
-	sym_stack -> data[sym_stack->p] = SYM_BLOCK;
-	// 一些set
-	left_sym = createset(SYM_BLOCK, SYM_C, SYM_C1, SYM_V, SYM_V1, SYM_P, SYM_NULL); // 非终结符集
-	block_status_set = createset(SYM_CONST, SYM_VAR, SYM_PROCEDURE); // block中的三种状态
-
 	printf("Please input source file name: "); // get file name to be compiled
 	scanf("%s", s);
 	if ((infile = fopen(s, "r")) == NULL){
@@ -864,11 +835,6 @@ void main (){
 	declbegsys = createset(SYM_CONST, SYM_VAR, SYM_PROCEDURE, SYM_NULL);
 	statbegsys = createset(SYM_BEGIN, SYM_CALL, SYM_IF, SYM_WHILE, SYM_NULL);
 	facbegsys = createset(SYM_IDENTIFIER, SYM_NUMBER, SYM_LPAREN, SYM_NULL);
-
-
-	// 初始化ll1表
-	init_ll1_table();
-
 
     /*
 	err 词法（/语法？）错误数
@@ -895,9 +861,7 @@ void main (){
 	destroyset(statbegsys);
 	destroyset(facbegsys);
 
-	free(sym_stack);
-
-// system("pause");
+system("pause");
 
 // 后续代码用于解释执行中间代码
 /*
